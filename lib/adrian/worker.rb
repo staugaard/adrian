@@ -11,7 +11,15 @@ module Adrian
     end
 
     def perform
-      work
+      exception = nil
+
+      begin
+        work
+      rescue Exception => e
+        exception = e
+      end
+
+      @boss.work_done(self, item, exception)
     end
 
     def work
