@@ -13,7 +13,7 @@ describe Adrian::Worker do
       boss = MiniTest::Mock.new
       worker.report_to(boss)
 
-      boss.expect(:work_done, nil, [worker, @item, nil])
+      boss.expect(:work_done, nil, [@item, nil])
       worker.perform
 
       boss.verify
@@ -28,7 +28,7 @@ describe Adrian::Worker do
       boss = MiniTest::Mock.new
       worker.report_to(boss)
 
-      boss.expect(:work_done, nil, [worker, @item, RuntimeError])
+      boss.expect(:work_done, nil, [@item, RuntimeError])
 
       worker.perform
 
