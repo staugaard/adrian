@@ -4,14 +4,15 @@ module Adrian
   class ArrayQueue < Queue
     def initialize(array = [])
       @array = array
+      @mutex = Mutex.new
     end
 
     def pop
-      @array.shift
+      @mutex.synchronize { @array.shift }
     end
 
     def push(item)
-      @array << item
+      @mutex.synchronize { @array << item }
     end
   end
 end
