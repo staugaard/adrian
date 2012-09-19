@@ -9,6 +9,7 @@ module Adrian
       @requeuer       = Requeuer.new
       @stop_when_done = !!options[:stop_when_done]
       @sleep          = options[:sleep] || 0.5
+      @options        = options
     end
 
     def add_queue(name, queue)
@@ -34,7 +35,7 @@ module Adrian
           delegate_work(item, worker_class)
         else
           if @stop_when_done
-            @running = false
+            stop
           else
             sleep(@sleep) if @sleep
           end

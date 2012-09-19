@@ -19,4 +19,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake'
   gem.add_development_dependency 'minitest'
   gem.add_development_dependency 'debugger'
+  gem.add_development_dependency 'girl_friday'
 end

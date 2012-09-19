@@ -1,0 +1,29 @@
+require_relative 'test_helper'
+
+describe Adrian::GirlFridayDispatcher do
+  before do
+    $done_items = []
+    @q = Adrian::ArrayQueue.new
+    @dispatcher = Adrian::GirlFridayDispatcher.new(:stop_when_done => true)
+    @dispatcher.add_queue(:q, @q)
+  end
+
+  describe "work delegation" do
+    it "should instantiate an instance of the worker for each item and ask it to perform" do
+      worker = Class.new(Adrian::Worker) do
+        def work
+          sleep(rand)
+          $done_items << @item
+        end
+      end
+
+      @q.push(1)
+      @q.push(2)
+      @q.push(3)
+
+      @dispatcher.start(:q, worker)
+
+      $done_items.sort.must_equal([1, 2, 3])
+    end
+  end
+end
