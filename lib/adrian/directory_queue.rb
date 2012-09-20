@@ -3,6 +3,42 @@ require 'fileutils'
 
 module Adrian
   class DirectoryQueue < Queue
+    class Item
+
+      attr_reader :path
+
+      def initialize(path)
+        @path = path
+      end
+
+      def key
+        File.basename(path)
+      end
+
+      def ==(other)
+        key == other.key
+      end
+
+      def move(destination)
+        destination_path = File.join(destination, File.basename(path))
+        File.rename(path, destination_path)
+        @path = destination_path
+      end
+
+      def updated_at
+        return nil if !exist?
+        File.mtime(path).utc
+      end
+
+      def touch
+        File.utime(Time.new, Time.new, path)
+      end
+
+      def exist?
+        File.exist?(path)
+      end
+
+    end
 
     def self.create(options = {})
       queue = new(options)
@@ -19,22 +55,24 @@ module Adrian
     end
 
     def pop
-      files.each do |file|
-        reserved_file = reserve(file)
-        return reserved_file if reserved_file
+      items.each do |item|
+        return item if reserve(item)
       end
 
       nil
     end
 
-    def push(file)
-      touch(file)
-      available_file_path = File.join(@available_path, File.basename(file))
-      File.rename(file, available_file_path)
-      available_file_path
+    def push(item)
+      item.move(@available_path)
+      item.touch
+      self
     end
 
     protected
+
+    def items
+      files.map { |file| Item.new(file) }.sort_by(&:updated_at)
+    end
 
     def files
       Dir.glob("#{@available_path}/*").select { |file| File.file?(file) }
@@ -44,17 +82,12 @@ module Adrian
       File.join(File.dirname(@available_path), 'cur')
     end
 
-    def reserve(file)
-      reserved_file_path = File.join(@reserved_path, File.basename(file))
-      File.rename(file, reserved_file_path)
-      touch(reserved_file_path)
-      reserved_file_path
+    def reserve(item)
+      item.move(@reserved_path)
+      item.touch
+      true
     rescue Errno::ENOENT => e
       false
-    end
-
-    def touch(path)
-      File.utime(Time.new, Time.new, path)
     end
 
   end
