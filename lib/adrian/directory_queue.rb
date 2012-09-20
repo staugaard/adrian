@@ -1,6 +1,5 @@
 require 'adrian/queue'
 require 'fileutils'
-require 'adrian/file_item'
 
 module Adrian
   class DirectoryQueue < Queue
