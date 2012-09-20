@@ -8,17 +8,17 @@ describe Adrian::DirectoryQueue do
   end
 
   it 'should act as a queue for files' do
-    item1 = Adrian::DirectoryQueue::Item.new(Tempfile.new('item1-').path)
-    item2 = Adrian::DirectoryQueue::Item.new(Tempfile.new('item2-').path)
-    item3 = Adrian::DirectoryQueue::Item.new(Tempfile.new('item3-').path)
+    item1 = Tempfile.new('item1-').path
+    item2 = Tempfile.new('item2-').path
+    item3 = Tempfile.new('item3-').path
 
     @q.push(item1)
     @q.push(item2)
     @q.push(item3)
 
-    @q.pop.must_equal item1
-    @q.pop.must_equal item2
-    @q.pop.must_equal item3
+    @q.pop.must_equal Adrian::DirectoryQueue::Item.new(item1)
+    @q.pop.must_equal Adrian::DirectoryQueue::Item.new(item2)
+    @q.pop.must_equal Adrian::DirectoryQueue::Item.new(item3)
     @q.pop.must_be_nil
   end
 
@@ -41,17 +41,17 @@ describe Adrian::DirectoryQueue do
         assert_equal @item, item
 
         assert_equal false, File.exist?(original_path)
-        assert_equal true,  File.exist?(File.join(@q.reserved_path, @item.key))
+        assert_equal true,  File.exist?(File.join(@q.reserved_path, @item.name))
       end
 
       it 'updates the file modification time' do
         @q.push(@item)
         original_updated_at = Time.new - 10_000
-        new_path = File.join(@q.available_path, @item.key)
+        new_path = File.join(@q.available_path, @item.name)
         File.utime(original_updated_at, original_updated_at, new_path)
         assert_equal original_updated_at.to_i, File.mtime(new_path).to_i
         @q.pop
-        reserved_path = File.join(@q.reserved_path, @item.key)
+        reserved_path = File.join(@q.reserved_path, @item.name)
 
         assert(File.mtime(reserved_path).to_i != original_updated_at.to_i)
       end
@@ -80,7 +80,7 @@ describe Adrian::DirectoryQueue do
         @q.push(@item)
 
         assert_equal false, File.exist?(original_path)
-        assert_equal true,  File.exist?(File.join(@q.available_path, @item.key))
+        assert_equal true,  File.exist?(File.join(@q.available_path, @item.name))
       end
 
       it 'updates the file modification time' do

@@ -11,12 +11,16 @@ module Adrian
         @path = path
       end
 
-      def key
+      def value
+        path
+      end
+
+      def name
         File.basename(path)
       end
 
       def ==(other)
-        key == other.key
+        name == other.name
       end
 
       def move(destination)
@@ -27,6 +31,10 @@ module Adrian
 
       def updated_at
         return nil if !exist?
+        File.mtime(path).utc
+      end
+
+      def created_at
         File.mtime(path).utc
       end
 
@@ -62,24 +70,27 @@ module Adrian
       nil
     end
 
-    def push(item)
+    def push(value)
+      item = wrap_item(value)
       item.move(@available_path)
       item.touch
       self
     end
 
+    def include?(value)
+      item = wrap_item(value)
+      items.include?(item)
+    end
+
+    def reserved?(value)
+      item = wrap_item(value)
+      reserved_items.include?(item)
+    end
+
     protected
 
-    def items
-      files.map { |file| Item.new(file) }.sort_by(&:updated_at)
-    end
-
-    def files
-      Dir.glob("#{@available_path}/*").select { |file| File.file?(file) }
-    end
-
-    def default_reserved_path
-      File.join(File.dirname(@available_path), 'cur')
+    def wrap_item(value)
+      value.is_a?(Item) ? value : Item.new(value)
     end
 
     def reserve(item)
@@ -88,6 +99,22 @@ module Adrian
       true
     rescue Errno::ENOENT => e
       false
+    end
+
+    def items
+      files.map { |file| Item.new(file) }.sort_by(&:updated_at)
+    end
+
+    def reserved_items
+
+    end
+
+    def files
+      Dir.glob("#{@available_path}/*").select { |file| File.file?(file) }
+    end
+
+    def default_reserved_path
+      File.join(File.dirname(@available_path), 'cur')
     end
 
   end
