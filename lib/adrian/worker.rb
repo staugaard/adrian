@@ -19,7 +19,7 @@ module Adrian
         exception = e
       end
 
-      @boss.work_done(self, item, exception)
+      @boss.work_done(item, exception) if @boss
     end
 
     def work

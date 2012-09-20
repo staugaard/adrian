@@ -3,9 +3,9 @@ require_relative 'test_helper'
 describe Adrian::ArrayQueue do
   it 'should allow construction with an array' do
     q = Adrian::ArrayQueue.new([1,2,3])
-    q.pop.must_equal 1
-    q.pop.must_equal 2
-    q.pop.must_equal 3
+    q.pop.value.must_equal 1
+    q.pop.value.must_equal 2
+    q.pop.value.must_equal 3
     q.pop.must_be_nil
   end
 
@@ -21,9 +21,9 @@ describe Adrian::ArrayQueue do
     q.push(2)
     q.push(3)
 
-    q.pop.must_equal 1
-    q.pop.must_equal 2
-    q.pop.must_equal 3
+    q.pop.value.must_equal 1
+    q.pop.value.must_equal 2
+    q.pop.value.must_equal 3
     q.pop.must_be_nil
   end
 end

@@ -1,15 +1,28 @@
+require 'adrian/requeuer'
+
 module Adrian
   class Dispatcher
     attr_reader :running
 
     def initialize(options = {})
       @queues         = {}
+      @requeuer       = Requeuer.new
       @stop_when_done = !!options[:stop_when_done]
       @sleep          = options[:sleep] || 0.5
+      @options        = options
     end
 
     def add_queue(name, queue)
       @queues[name.to_sym] = queue
+    end
+
+    def requeue_on_failure(queue_name, *exceptions)
+      raise "Unknown queue name #{queue_name}" unless @queues.has_key?(queue_name.to_sym)
+      @requeuer.add_rule(queue_name.to_sym, *exceptions)
+    end
+
+    def requeue_on_done(queue_name)
+      requeue_on_failure(queue_name, nil)
     end
 
     def start(queue_name, worker_class)
@@ -22,7 +35,7 @@ module Adrian
           delegate_work(item, worker_class)
         else
           if @stop_when_done
-            @running = false
+            stop
           else
             sleep(@sleep) if @sleep
           end
@@ -40,8 +53,11 @@ module Adrian
       worker.perform
     end
 
-    def work_done(worker, item, exception = nil)
-      puts "worker completed #{item.inspect}. #{exception.inspect}"
+    def work_done(item, exception = nil)
+      if queue_name = @requeuer.route(exception)
+        @queues[queue_name].push(item)
+      end
     end
+
   end
 end
