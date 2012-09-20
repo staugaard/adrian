@@ -47,14 +47,17 @@ describe Adrian::DirectoryQueue do
       it 'updates the file modification time' do
         @q.push(@item)
         original_updated_at = Time.new - 10_000
-        new_path = File.join(@q.available_path, @item.name)
-        File.utime(original_updated_at, original_updated_at, new_path)
-        assert_equal original_updated_at.to_i, File.mtime(new_path).to_i
+        @item.touch(original_updated_at)
+        assert_equal original_updated_at.to_i, @item.updated_at.to_i
         @q.pop
-        reserved_path = File.join(@q.reserved_path, @item.name)
 
-        assert(File.mtime(reserved_path).to_i != original_updated_at.to_i)
+        assert(@item.updated_at.to_i != original_updated_at.to_i)
       end
+
+describe 'touch' do
+
+        #assert_equal original_updated_at.to_i, File.mtime(new_path).to_i
+end
 
       it 'skips the file when moved by another process' do
         def @q.files

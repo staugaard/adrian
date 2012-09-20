@@ -3,11 +3,11 @@ require 'fileutils'
 
 module Adrian
   class DirectoryQueue < Queue
-    class Item
+    class Item < QueueItem
 
       attr_reader :path
 
-      def initialize(path)
+      def initialize(path, created_at = nil)
         @path = path
       end
 
@@ -38,8 +38,8 @@ module Adrian
         File.mtime(path).utc
       end
 
-      def touch
-        File.utime(Time.new, Time.new, path)
+      def touch(updated_at = Time.new)
+        File.utime(updated_at, updated_at, path)
       end
 
       def exist?
