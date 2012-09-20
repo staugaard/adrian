@@ -1,52 +1,9 @@
 require 'adrian/queue'
 require 'fileutils'
+require 'adrian/file_item'
 
 module Adrian
   class DirectoryQueue < Queue
-    class Item < QueueItem
-
-      attr_reader :path
-
-      def initialize(path, created_at = nil)
-        @path = path
-      end
-
-      def value
-        path
-      end
-
-      def name
-        File.basename(path)
-      end
-
-      def ==(other)
-        name == other.name
-      end
-
-      def move(destination)
-        destination_path = File.join(destination, File.basename(path))
-        File.rename(path, destination_path)
-        @path = destination_path
-      end
-
-      def updated_at
-        return nil if !exist?
-        File.mtime(path).utc
-      end
-
-      def created_at
-        File.mtime(path).utc
-      end
-
-      def touch(updated_at = Time.new)
-        File.utime(updated_at, updated_at, path)
-      end
-
-      def exist?
-        File.exist?(path)
-      end
-
-    end
 
     def self.create(options = {})
       queue = new(options)
@@ -82,15 +39,10 @@ module Adrian
       items.include?(item)
     end
 
-    def reserved?(value)
-      item = wrap_item(value)
-      reserved_items.include?(item)
-    end
-
     protected
 
     def wrap_item(value)
-      value.is_a?(Item) ? value : Item.new(value)
+      value.is_a?(FileItem) ? value : FileItem.new(value)
     end
 
     def reserve(item)
@@ -102,11 +54,7 @@ module Adrian
     end
 
     def items
-      files.map { |file| Item.new(file) }.sort_by(&:updated_at)
-    end
-
-    def reserved_items
-
+      files.map { |file| FileItem.new(file) }.sort_by(&:updated_at)
     end
 
     def files

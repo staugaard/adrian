@@ -16,9 +16,9 @@ describe Adrian::DirectoryQueue do
     @q.push(item2)
     @q.push(item3)
 
-    @q.pop.must_equal Adrian::DirectoryQueue::Item.new(item1)
-    @q.pop.must_equal Adrian::DirectoryQueue::Item.new(item2)
-    @q.pop.must_equal Adrian::DirectoryQueue::Item.new(item3)
+    @q.pop.must_equal Adrian::FileItem.new(item1)
+    @q.pop.must_equal Adrian::FileItem.new(item2)
+    @q.pop.must_equal Adrian::FileItem.new(item3)
     @q.pop.must_be_nil
   end
 
@@ -26,7 +26,7 @@ describe Adrian::DirectoryQueue do
 
     describe 'pop' do
       before do
-        @item = Adrian::DirectoryQueue::Item.new(Tempfile.new('item').path)
+        @item = Adrian::FileItem.new(Tempfile.new('item').path)
       end
 
       it 'provides an available file' do
@@ -44,20 +44,14 @@ describe Adrian::DirectoryQueue do
         assert_equal true,  File.exist?(File.join(@q.reserved_path, @item.name))
       end
 
-      it 'updates the file modification time' do
+      it 'touches the item' do
         @q.push(@item)
-        original_updated_at = Time.new - 10_000
-        @item.touch(original_updated_at)
-        assert_equal original_updated_at.to_i, @item.updated_at.to_i
-        @q.pop
+        now  = Time.new - 100
+        item = nil
+        Time.stub(:new, now) { item = @q.pop }
 
-        assert(@item.updated_at.to_i != original_updated_at.to_i)
+        assert_equal now.to_i, item.updated_at.to_i
       end
-
-describe 'touch' do
-
-        #assert_equal original_updated_at.to_i, File.mtime(new_path).to_i
-end
 
       it 'skips the file when moved by another process' do
         def @q.files
@@ -75,7 +69,7 @@ end
 
     describe 'push' do
       before do
-        @item = Adrian::DirectoryQueue::Item.new(Tempfile.new('item').path)
+        @item = Adrian::FileItem.new(Tempfile.new('item').path)
       end
 
       it 'moves the file to the available directory' do
@@ -86,14 +80,11 @@ end
         assert_equal true,  File.exist?(File.join(@q.available_path, @item.name))
       end
 
-      it 'updates the file modification time' do
-        original_updated_at = Time.new - 10_000
-        File.utime(original_updated_at, original_updated_at, @item.path)
-        assert_equal original_updated_at.to_i, File.mtime(@item.path).to_i
-        @q.push(@item)
+      it 'touches the item' do
+        now = Time.new - 100
+        Time.stub(:new, now) { @q.push(@item) }
 
-        new_path = File.join(@q.available_path, File.basename(@item.path))
-        assert(File.mtime(new_path).to_i != original_updated_at.to_i)
+        assert_equal now.to_i, @item.updated_at.to_i
       end
 
     end
