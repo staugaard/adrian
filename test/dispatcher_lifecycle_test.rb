@@ -3,7 +3,7 @@ require_relative 'test_helper'
 describe "Adrian::Dispatcher lifecycle" do
   class Worker < Adrian::Worker
     def work
-      $done_items << item
+      $done_items << item.value
     end
   end
 

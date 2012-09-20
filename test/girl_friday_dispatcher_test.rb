@@ -13,7 +13,7 @@ describe Adrian::GirlFridayDispatcher do
       worker = Class.new(Adrian::Worker) do
         def work
           sleep(rand)
-          $done_items << @item
+          $done_items << @item.value
         end
       end
 

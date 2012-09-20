@@ -16,7 +16,7 @@ describe Adrian::Dispatcher do
         end
 
         def perform
-          $done_items << [@boss, @item]
+          $done_items << [@boss, @item.value]
         end
 
         def report_to(boss)
@@ -45,7 +45,7 @@ describe Adrian::Dispatcher do
       @q.pop.must_be_nil
 
       @dispatcher.work_done(1, RuntimeError.new)
-      @q.pop.must_equal 1
+      @q.pop.value.must_equal 1
     end
   end
 end

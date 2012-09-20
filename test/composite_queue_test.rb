@@ -18,10 +18,10 @@ describe Adrian::CompositeQueue do
       @q2.push(3)
       @q2.push(4)
 
-      @q.pop.must_equal(1)
-      @q.pop.must_equal(2)
-      @q.pop.must_equal(3)
-      @q.pop.must_equal(4)
+      @q.pop.value.must_equal(1)
+      @q.pop.value.must_equal(2)
+      @q.pop.value.must_equal(3)
+      @q.pop.value.must_equal(4)
       @q.pop.must_be_nil
       @q1.pop.must_be_nil
       @q2.pop.must_be_nil

@@ -1,6 +1,8 @@
 require 'adrian/version'
 
 module Adrian
+  autoload :QueueItem,            'adrian/queue_item'
+
   autoload :ArrayQueue,           'adrian/array_queue'
   autoload :CompositeQueue,       'adrian/composite_queue'
 
