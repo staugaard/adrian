@@ -1,34 +1,26 @@
-require 'adrian/requeuer'
+require 'adrian/failure_handler'
 
 module Adrian
   class Dispatcher
     attr_reader :running
 
     def initialize(options = {})
-      @queues         = {}
-      @requeuer       = Requeuer.new
-      @stop_when_done = !!options[:stop_when_done]
-      @sleep          = options[:sleep] || 0.5
-      @options        = options
+      @failure_handler = FailureHandler.new
+      @stop_when_done  = !!options[:stop_when_done]
+      @sleep           = options[:sleep] || 0.5
+      @options         = options
     end
 
-    def add_queue(name, queue)
-      @queues[name.to_sym] = queue
+    def on_failure(*exceptions)
+      @failure_handler.add_rule(*exceptions, &Proc.new)
     end
 
-    def requeue_on_failure(queue_name, *exceptions)
-      raise "Unknown queue name #{queue_name}" unless @queues.has_key?(queue_name.to_sym)
-      @requeuer.add_rule(queue_name.to_sym, *exceptions)
+    def on_done
+      @failure_handler.add_rule(nil, &Proc.new)
     end
 
-    def requeue_on_done(queue_name)
-      requeue_on_failure(queue_name, nil)
-    end
-
-    def start(queue_name, worker_class)
+    def start(queue, worker_class)
       @running = true
-
-      queue = @queues[queue_name.to_sym]
 
       while @running do
         if item = queue.pop
@@ -54,8 +46,10 @@ module Adrian
     end
 
     def work_done(item, exception = nil)
-      if queue_name = @requeuer.route(exception)
-        @queues[queue_name].push(item)
+      if handler = @failure_handler.handle(exception)
+        handler.call(item, exception)
+      else
+        raise exception if exception
       end
     end
 

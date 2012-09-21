@@ -5,7 +5,6 @@ describe Adrian::Dispatcher do
     $done_items = []
     @q = Adrian::ArrayQueue.new
     @dispatcher = Adrian::Dispatcher.new(:stop_when_done => true)
-    @dispatcher.add_queue(:q, @q)
   end
 
   describe "work delegation" do
@@ -28,7 +27,7 @@ describe Adrian::Dispatcher do
       @q.push(2)
       @q.push(3)
 
-      @dispatcher.start(:q, worker)
+      @dispatcher.start(@q, worker)
 
       $done_items.must_equal([[@dispatcher, 1], [@dispatcher, 2], [@dispatcher, 3]])
     end
@@ -36,7 +35,9 @@ describe Adrian::Dispatcher do
 
   describe "work evaluation" do
     it "should use the requeuer to route the result" do
-      @dispatcher.requeue_on_failure(:q, RuntimeError)
+      @dispatcher.on_failure(RuntimeError) do |item, exception|
+        @q.push(item)
+      end
 
       @dispatcher.work_done(1)
       @q.pop.must_be_nil

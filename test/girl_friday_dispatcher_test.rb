@@ -5,7 +5,6 @@ describe Adrian::GirlFridayDispatcher do
     $done_items = []
     @q = Adrian::ArrayQueue.new
     @dispatcher = Adrian::GirlFridayDispatcher.new(:stop_when_done => true)
-    @dispatcher.add_queue(:q, @q)
   end
 
   describe "work delegation" do
@@ -21,7 +20,7 @@ describe Adrian::GirlFridayDispatcher do
       @q.push(2)
       @q.push(3)
 
-      @dispatcher.start(:q, worker)
+      @dispatcher.start(@q, worker)
 
       $done_items.sort.must_equal([1, 2, 3])
     end

@@ -1,29 +1,27 @@
 module Adrian
-  class Requeuer
+  class FailureHandler
     def initialize
       @rules = []
     end
 
-    def add_rule(queue_name, *exceptions)
+    def add_rule(*exceptions, &block)
       exceptions.each do |exception_class|
-        @rules << Rule.new(queue_name, exception_class)
+        @rules << Rule.new(exception_class, block)
       end
     end
 
-    def route(exception)
+    def handle(exception)
       if rule = @rules.find { |r| r.match(exception) }
-        rule.queue_name
-      else
-        nil
+        rule.block
       end
     end
 
     class Rule
-      attr_reader :queue_name
+      attr_reader :block
 
-      def initialize(queue_name, exception_class)
-        @queue_name      = queue_name
+      def initialize(exception_class, block)
         @exception_class = exception_class
+        @block           = block
       end
 
       def match(exception)
