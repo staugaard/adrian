@@ -20,12 +20,12 @@ q2 = Adrian::ArrayQueue.new
 
 dispatcher = Adrian::Dispatcher.new
 
-dispatcher.on_failure(ExampleError) do |item, excpetion|
+dispatcher.on_failure(ExampleError) do |item, worker, exception|
   puts "FAILURE!!! #{item.value}"
   q2.push(item)
 end
 
-dispatcher.on_done do |item|
+dispatcher.on_done do |item, worker|
   puts "DONE!!! #{item.value}"
 end
 

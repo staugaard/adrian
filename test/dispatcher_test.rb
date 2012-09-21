@@ -34,18 +34,18 @@ describe Adrian::Dispatcher do
   end
 
   describe "work evaluation" do
-    it "should use the requeuer to route the result" do
-      @dispatcher.on_failure(RuntimeError) do |item, exception|
+    it "should use the failure handler to handle the result" do
+      @dispatcher.on_failure(RuntimeError) do |item, worker, exception|
         @q.push(item)
       end
-
-      @dispatcher.work_done(1)
-      @q.pop.must_be_nil
 
       @dispatcher.work_done(1, nil)
       @q.pop.must_be_nil
 
-      @dispatcher.work_done(1, RuntimeError.new)
+      @dispatcher.work_done(1, nil, nil)
+      @q.pop.must_be_nil
+
+      @dispatcher.work_done(1, nil, RuntimeError.new)
       @q.pop.value.must_equal 1
     end
   end

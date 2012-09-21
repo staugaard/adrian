@@ -45,7 +45,7 @@ module Adrian
       worker.perform
     end
 
-    def work_done(item, exception = nil)
+    def work_done(item, worker, exception = nil)
       if handler = @failure_handler.handle(exception)
         handler.call(item, exception)
       else
