@@ -4,7 +4,7 @@ require 'tmpdir'
 
 describe Adrian::DirectoryQueue do
   before do
-    @q = Adrian::DirectoryQueue.create(:available_path => Dir.mktmpdir('dir_queue_test'))
+    @q = Adrian::DirectoryQueue.create(:path => Dir.mktmpdir('dir_queue_test'))
   end
 
   it 'should act as a queue for files' do

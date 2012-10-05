@@ -13,7 +13,7 @@ module Adrian
     attr_reader :available_path, :reserved_path
 
     def initialize(options = {})
-      @available_path = options.fetch(:available_path)
+      @available_path = options.fetch(:path)
       @reserved_path  = options.fetch(:reserved_path, default_reserved_path)
     end
 
