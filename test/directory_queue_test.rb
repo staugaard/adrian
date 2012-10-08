@@ -1,10 +1,16 @@
 require_relative 'test_helper'
 require 'tempfile'
 require 'tmpdir'
+require 'fileutils'
 
 describe Adrian::DirectoryQueue do
   before do
     @q = Adrian::DirectoryQueue.create(:available_path => Dir.mktmpdir('dir_queue_test'))
+  end
+
+  after do
+   FileUtils.rm_r(@q.available_path, :force => true)
+   FileUtils.rm_r(@q.reserved_path,  :force => true)
   end
 
   it 'should act as a queue for files' do
@@ -48,15 +54,16 @@ describe Adrian::DirectoryQueue do
         @q.push(@item)
         reserved_item = @q.pop
         assert reserved_item
-        fifty_nine_minutes = 60 * 59
+        one_hour = 3_600
 
-        Time.stub(:new, reserved_item.updated_at + fifty_nine_minutes) do
+        Time.stub(:new, reserved_item.updated_at + one_hour - 1) do
           assert_equal nil, @q.pop
         end
 
-        Time.stub(:new, reserved_item.updated_at + fifty_nine_minutes + 1) do
+        Time.stub(:new, reserved_item.updated_at + one_hour) do
           assert_equal @item, @q.pop
         end
+
       end
 
       it 'touches the item' do

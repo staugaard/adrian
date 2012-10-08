@@ -10,7 +10,8 @@ module Adrian
     end
 
     def ==(other)
-      name == other.name
+      other.respond_to?(:name) &&
+        name == other.name
     end
 
     def move(destination)
