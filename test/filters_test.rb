@@ -44,10 +44,10 @@ describe Adrian::Filters do
   describe Adrian::Filters::Delay do
     before do
       @filter          = Adrian::Filters::Delay.new
-      @fifteen_minutes = 900
       @updatable_item  = Adrian::QueueItem.new("hello")
       @updatable_item.extend(Updatable)
       @updatable_item.updated_at = Time.new
+      @fifteen_minutes = 900
     end
 
     it "allows items that have not been recently updated" do
@@ -63,6 +63,39 @@ describe Adrian::Filters do
     it "has a configurable recently updated duration that defaults to 15 minutes" do
       assert_equal @fifteen_minutes, @filter.duration
       configured_filter = Adrian::Filters::Delay.new(:duration => 1)
+
+      assert_equal 1, configured_filter.duration
+    end
+
+  end
+
+  describe Adrian::Filters::FileLock do
+    before do
+      @filter         = Adrian::Filters::FileLock.new(:reserved_path => 'path/to/locked')
+      @available_item = Adrian::FileItem.new("path/to/file")
+      @locked_item    = Adrian::FileItem.new("path/to/locked/file")
+      @one_hour       = 3_600
+    end
+
+    it "allows items that are not locked" do
+      assert_equal true, @filter.allow?(@available_item)
+    end
+
+    it "allows items with an expired lock" do
+      @locked_item.stub(:updated_at, Time.new - @one_hour) do
+        assert_equal true, @filter.allow?(@locked_item)
+      end
+    end
+
+    it "does not allow items with a fresh lock" do
+      @locked_item.stub(:updated_at, Time.new) do
+        assert_equal false, @filter.allow?(@locked_item)
+      end
+    end
+
+    it "has a configurable lock expiry duration that defaults to one hour" do
+      assert_equal @one_hour, @filter.duration
+      configured_filter = Adrian::Filters::FileLock.new(:duration => 1, :reserved_path => 'path/to/locked')
 
       assert_equal 1, configured_filter.duration
     end

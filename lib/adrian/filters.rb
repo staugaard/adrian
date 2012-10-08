@@ -10,6 +10,7 @@ module Adrian
     end
 
     class Delay
+      FIFTEEN_MINUTES = 900
 
       def initialize(options = {})
         @options = options
@@ -19,30 +20,34 @@ module Adrian
         item.updated_at <= (Time.new - duration)
       end
 
-      # Default is 15 minutes
       def duration
-        @options[:duration] || 900
+        @options[:duration] || FIFTEEN_MINUTES
       end
 
     end
 
     class FileLock
+      ONE_HOUR = 3_600
 
       def initialize(options = {})
-        @options = options
+        @options       = options
+        @reserved_path = @options.fetch(:reserved_path)
       end
 
       def allow?(item)
-        !locked?(item) || item.updated_at <= (Time.new - @duration)
+        !locked?(item) || lock_expired?(item)
+      end
+
+      def lock_expired?(item)
+        item.updated_at <= (Time.new - duration)
       end
 
       def locked?(item)
-        @options[:reservation_path] == File.dirname(item.path)
+        @reserved_path == File.dirname(item.path)
       end
 
-      # Default is an hour
       def duration
-        @options[:duration] || 3_600
+        @options[:duration] || ONE_HOUR
       end
 
     end

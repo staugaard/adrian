@@ -44,6 +44,21 @@ describe Adrian::DirectoryQueue do
         assert_equal true,  File.exist?(File.join(@q.reserved_path, @item.name))
       end
 
+      it 'reserves the file for an hour by default' do
+        @q.push(@item)
+        reserved_item = @q.pop
+        assert reserved_item
+        fifty_nine_minutes = 60 * 59
+
+        Time.stub(:new, reserved_item.updated_at + fifty_nine_minutes) do
+          assert_equal nil, @q.pop
+        end
+
+        Time.stub(:new, reserved_item.updated_at + fifty_nine_minutes + 1) do
+          assert_equal @item, @q.pop
+        end
+      end
+
       it 'touches the item' do
         @q.push(@item)
         now  = Time.new - 100
