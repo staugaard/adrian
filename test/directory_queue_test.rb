@@ -1,10 +1,16 @@
 require_relative 'test_helper'
 require 'tempfile'
 require 'tmpdir'
+require 'fileutils'
 
 describe Adrian::DirectoryQueue do
   before do
     @q = Adrian::DirectoryQueue.create(:path => Dir.mktmpdir('dir_queue_test'))
+  end
+
+  after do
+   FileUtils.rm_r(@q.available_path, :force => true)
+   FileUtils.rm_r(@q.reserved_path,  :force => true)
   end
 
   it 'should act as a queue for files' do
@@ -42,6 +48,22 @@ describe Adrian::DirectoryQueue do
 
         assert_equal false, File.exist?(original_path)
         assert_equal true,  File.exist?(File.join(@q.reserved_path, @item.name))
+      end
+
+      it 'reserves the file for an hour by default' do
+        @q.push(@item)
+        reserved_item = @q.pop
+        assert reserved_item
+        one_hour = 3_600
+
+        Time.stub(:new, reserved_item.updated_at + one_hour - 1) do
+          assert_equal nil, @q.pop
+        end
+
+        Time.stub(:new, reserved_item.updated_at + one_hour) do
+          assert_equal @item, @q.pop
+        end
+
       end
 
       it 'touches the item' do
@@ -87,6 +109,31 @@ describe Adrian::DirectoryQueue do
         assert_equal now.to_i, @item.updated_at.to_i
       end
 
+    end
+
+    describe 'filters' do
+      it 'should add a delay filter if the :delay option is given' do
+        q = Adrian::DirectoryQueue.create(:available_path => Dir.mktmpdir('dir_queue_test'))
+        filter = q.filters.find {|filter| filter.is_a?(Adrian::Filters::Delay)}
+        filter.must_equal nil
+
+        q = Adrian::DirectoryQueue.create(:available_path => Dir.mktmpdir('dir_queue_test'), :delay => 300)
+        filter = q.filters.find {|filter| filter.is_a?(Adrian::Filters::Delay)}
+        filter.wont_equal nil
+        filter.duration.must_equal 300
+      end
+
+      it 'should add a lock filter that can be configured with the :lock_duration option' do
+        q = Adrian::DirectoryQueue.create(:available_path => Dir.mktmpdir('dir_queue_test'))
+        filter = q.filters.find {|filter| filter.is_a?(Adrian::Filters::FileLock)}
+        filter.wont_equal nil
+        filter.duration.must_equal 3600 # default value
+
+        q = Adrian::DirectoryQueue.create(:available_path => Dir.mktmpdir('dir_queue_test'), :lock_duration => 300)
+        filter = q.filters.find {|filter| filter.is_a?(Adrian::Filters::FileLock)}
+        filter.wont_equal nil
+        filter.duration.must_equal 300
+      end
     end
 
   end
