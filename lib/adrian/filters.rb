@@ -21,7 +21,7 @@ module Adrian
       end
 
       def duration
-        @options[:duration] || FIFTEEN_MINUTES
+        @options[:duration] ||= FIFTEEN_MINUTES
       end
 
     end
@@ -47,7 +47,7 @@ module Adrian
       end
 
       def duration
-        @options[:duration] || ONE_HOUR
+        @options[:duration] ||= ONE_HOUR
       end
 
     end
