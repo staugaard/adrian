@@ -111,6 +111,19 @@ describe Adrian::DirectoryQueue do
 
     end
 
+    describe 'filters' do
+      it 'should add a delay filter if the :delay option is given' do
+        q = Adrian::DirectoryQueue.create(:available_path => Dir.mktmpdir('dir_queue_test'))
+        filter = q.filters.find {|filter| filter.is_a?(Adrian::Filters::Delay)}
+        filter.must_equal nil
+
+        q = Adrian::DirectoryQueue.create(:available_path => Dir.mktmpdir('dir_queue_test'), :delay => 300)
+        filter = q.filters.find {|filter| filter.is_a?(Adrian::Filters::Delay)}
+        filter.wont_equal nil
+        filter.duration.must_equal 300
+      end
+    end
+
   end
 
 end

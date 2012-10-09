@@ -22,6 +22,7 @@ module Adrian
       @available_path = options.fetch(:available_path)
       @reserved_path  = options.fetch(:reserved_path, default_reserved_path)
       filters << Filters::FileLock.new(:duration => options[:duration], :reserved_path => reserved_path)
+      filters << Filters::Delay.new(:duration => options[:delay]) if options[:delay]
     end
 
     def pop
