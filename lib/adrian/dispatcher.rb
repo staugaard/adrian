@@ -5,10 +5,11 @@ module Adrian
     attr_reader :running
 
     def initialize(options = {})
-      @failure_handler = FailureHandler.new
-      @stop_when_done  = !!options[:stop_when_done]
-      @sleep           = options[:sleep] || 0.5
-      @options         = options
+      @failure_handler     = FailureHandler.new
+      @stop_when_done      = !!options[:stop_when_done]
+      @stop_when_signalled = options.fetch(:stop_when_signalled, true)
+      @sleep               = options[:sleep] || 0.5
+      @options             = options
     end
 
     def on_failure(*exceptions)
@@ -20,6 +21,7 @@ module Adrian
     end
 
     def start(queue, worker_class)
+      trap_stop_signals if @stop_when_signalled
       @running = true
 
       while @running do
@@ -37,6 +39,11 @@ module Adrian
 
     def stop
       @running = false
+    end
+
+    def trap_stop_signals
+      Signal.trap('TERM') { stop }
+      Signal.trap('INT')  { stop }
     end
 
     def delegate_work(item, worker_class)
