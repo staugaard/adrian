@@ -25,6 +25,18 @@ describe Adrian::FileItem do
     assert_equal item1, item3
   end
 
+  describe 'updated_at' do
+
+    it 'is nil when moved by another process' do
+      assert @item.updated_at
+      File.unlink(@item.path)
+      assert_equal false, @item.exist?
+
+      assert_equal nil, @item.updated_at
+    end
+
+  end
+
   describe 'move' do
     before do
       @destination = Dir.mktmpdir('file_item_move_test')

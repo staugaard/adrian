@@ -21,7 +21,9 @@ module Adrian
     end
 
     def updated_at
-      File.mtime(path).utc if exist?
+      File.mtime(path).utc
+    rescue Errno::ENOENT
+      nil
     end
 
     def touch(updated_at = Time.new)
