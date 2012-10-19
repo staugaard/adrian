@@ -21,12 +21,13 @@ module Adrian
     end
 
     def updated_at
-      File.mtime(path).utc
+      @updated_at ||= File.mtime(path).utc
     rescue Errno::ENOENT
       nil
     end
 
     def touch(updated_at = Time.new)
+      @updated_at = nil
       File.utime(updated_at, updated_at, path)
     end
 
