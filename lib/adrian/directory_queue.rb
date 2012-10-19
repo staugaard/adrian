@@ -61,7 +61,7 @@ module Adrian
 
     def items
       items = files.map { |file| FileItem.new(file) }
-      items.reject! { |item| item.updated_at.nil? || filter?(item) }
+      items.reject! { |item| !item.exist? || filter?(item) }
       items.sort_by(&:updated_at)
     end
 
