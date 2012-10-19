@@ -5,7 +5,7 @@ require 'fileutils'
 
 describe Adrian::DirectoryQueue do
   before do
-    @q = Adrian::DirectoryQueue.create(:path => Dir.mktmpdir('dir_queue_test'))
+    @q = Adrian::DirectoryQueue.create(:path => Dir.mktmpdir('dir_queue_test'), :delay => 0)
   end
 
   after do
@@ -68,7 +68,7 @@ describe Adrian::DirectoryQueue do
 
       it 'touches the item' do
         @q.push(@item)
-        now  = Time.new - 100
+        now  = Time.new + 100
         item = nil
         Time.stub(:new, now) { item = @q.pop }
 
