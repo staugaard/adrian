@@ -1,6 +1,12 @@
 module Adrian
   class FileItem < QueueItem
 
+    def initialize(value, created_at = Time.now)
+      @value      = value
+      @created_at = created_at
+      updated_at
+    end
+
     def path
       value
     end
@@ -27,7 +33,7 @@ module Adrian
     end
 
     def touch(updated_at = Time.new)
-      @updated_at = nil
+      @updated_at = updated_at
       File.utime(updated_at, updated_at, path)
     end
 

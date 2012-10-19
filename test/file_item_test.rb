@@ -28,9 +28,9 @@ describe Adrian::FileItem do
   describe 'updated_at' do
 
     it 'is nil when moved by another process' do
-      File.unlink(@item.path)
-      assert_equal false, @item.exist?
-      assert_equal nil,   @item.updated_at
+      item = Adrian::FileItem.new('moved/during/initialize')
+      assert_equal false, item.exist?
+      assert_equal nil,   item.updated_at
     end
 
     it 'is cached' do
