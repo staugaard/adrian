@@ -36,7 +36,7 @@ module Adrian
 
     def push(value)
       item = wrap_item(value)
-      item.move(@available_path)
+      item.move(available_path)
       item.touch
       self
     end
@@ -55,7 +55,7 @@ module Adrian
     end
 
     def reserve(item)
-      item.move(@reserved_path)
+      item.move(reserved_path)
       item.touch
       true
     rescue Errno::ENOENT => e
@@ -73,11 +73,11 @@ module Adrian
     end
 
     def available_files
-      Dir.glob("#{@available_path}/*")
+      Dir.glob("#{available_path}/*")
     end
 
     def reserved_files
-      Dir.glob("#{@reserved_path}/*")
+      Dir.glob("#{reserved_path}/*")
     end
 
     def default_reserved_path
