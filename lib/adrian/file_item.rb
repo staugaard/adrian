@@ -1,5 +1,6 @@
 module Adrian
   class FileItem < QueueItem
+    attr_accessor :logger
 
     def initialize(value, created_at = Time.now)
       @value      = value
@@ -22,6 +23,7 @@ module Adrian
 
     def move(destination)
       destination_path = File.join(destination, File.basename(path))
+      logger.info("Moving #{path} to #{destination_path}") if logger
       File.rename(path, destination_path)
       @value = destination_path
     end

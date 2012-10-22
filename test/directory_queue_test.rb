@@ -2,10 +2,12 @@ require_relative 'test_helper'
 require 'tempfile'
 require 'tmpdir'
 require 'fileutils'
+require 'logger'
 
 describe Adrian::DirectoryQueue do
   before do
-    @q = Adrian::DirectoryQueue.create(:path => Dir.mktmpdir('dir_queue_test'), :delay => 0)
+    @logger = Logger.new('/dev/null')
+    @q = Adrian::DirectoryQueue.create(:path => Dir.mktmpdir('dir_queue_test'), :delay => 0, :logger => @logger)
   end
 
   after do
@@ -85,6 +87,12 @@ describe Adrian::DirectoryQueue do
       it "only provides normal files" do
         not_file = Dir.mktmpdir(@q.available_path, 'directory_queue_x')
         assert_equal nil, @q.pop
+      end
+
+      it "set's the logger on the item" do
+        @item.logger.must_be_nil
+        @q.push(@item)
+        @q.pop.logger.must_equal @logger
       end
 
     end

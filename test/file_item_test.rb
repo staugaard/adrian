@@ -59,6 +59,17 @@ describe Adrian::FileItem do
       assert_equal @destination, File.dirname(@item.path)
     end
 
+    it 'logs the move on the logger' do
+      destination_file_name = File.join(@destination, File.basename(@item.path))
+      logger = MiniTest::Mock.new
+      logger.expect(:info, nil, ["Moving #{@item.path} to #{destination_file_name}"])
+      @item.logger = logger
+
+      @item.move(@destination)
+
+      logger.verify
+    end
+
   end
 
   describe 'touch' do

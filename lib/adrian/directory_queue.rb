@@ -11,7 +11,7 @@ module Adrian
       queue
     end
 
-    attr_reader :available_path, :reserved_path
+    attr_reader :available_path, :reserved_path, :logger
 
     # Note:
     # There is the possibility of an item being consumed by multiple processes when its still in the queue after its lock expires.
@@ -21,6 +21,7 @@ module Adrian
     def initialize(options = {})
       @available_path = options.fetch(:path)
       @reserved_path  = options.fetch(:reserved_path, default_reserved_path)
+      @logger         = options[:logger]
       filters << Filters::FileLock.new(:duration => options[:lock_duration], :reserved_path => reserved_path)
       filters << Filters::Delay.new(:duration => options[:delay]) if options[:delay]
     end
@@ -48,7 +49,9 @@ module Adrian
     protected
 
     def wrap_item(value)
-      value.is_a?(FileItem) ? value : FileItem.new(value)
+      item = value.is_a?(FileItem) ? value : FileItem.new(value)
+      item.logger ||= logger
+      item
     end
 
     def reserve(item)
@@ -60,7 +63,7 @@ module Adrian
     end
 
     def items
-      items = files.map { |file| FileItem.new(file) }
+      items = files.map { |file| wrap_item(file) }
       items.reject! { |item| !item.exist? || filter?(item) }
       items.sort_by(&:updated_at)
     end
