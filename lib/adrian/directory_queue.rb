@@ -1,7 +1,8 @@
+require 'adrian/queue'
 require 'fileutils'
 
 module Adrian
-  class DirectoryQueue < Queue
+  class DirectoryQueue < Adrian::Queue
     include Filters
 
     def self.create(options = {})

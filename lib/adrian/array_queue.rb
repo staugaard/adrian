@@ -1,7 +1,7 @@
 require 'adrian/queue'
 
 module Adrian
-  class ArrayQueue < Queue
+  class ArrayQueue < Adrian::Queue
     def initialize(array = [], options = {})
       super(options)
       @array = array.map { |item| wrap_item(item) }
