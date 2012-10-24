@@ -19,6 +19,7 @@ module Adrian
     #   1. It's much simpler than introducing a seperate monitoring process to handle lock expiry.
     #   2. This is an acceptable and rare event. e.g. it only happens when the process working on the item crashes without being able to release the lock
     def initialize(options = {})
+      super
       @available_path = options.fetch(:path)
       @reserved_path  = options.fetch(:reserved_path, default_reserved_path)
       @logger         = options[:logger]
@@ -26,7 +27,7 @@ module Adrian
       filters << Filters::Delay.new(:duration => options[:delay]) if options[:delay]
     end
 
-    def pop
+    def pop_item
       items.each do |item|
         return item if reserve(item)
       end
@@ -34,7 +35,7 @@ module Adrian
       nil
     end
 
-    def push(value)
+    def push_item(value)
       item = wrap_item(value)
       item.move(available_path)
       item.touch

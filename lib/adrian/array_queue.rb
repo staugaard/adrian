@@ -2,16 +2,17 @@ require 'adrian/queue'
 
 module Adrian
   class ArrayQueue < Queue
-    def initialize(array = [])
+    def initialize(array = [], options = {})
+      super(options)
       @array = array.map { |item| wrap_item(item) }
       @mutex = Mutex.new
     end
 
-    def pop
+    def pop_item
       @mutex.synchronize { @array.shift }
     end
 
-    def push(item)
+    def push_item(item)
       item = wrap_item(item)
       @mutex.synchronize { @array << item }
       self

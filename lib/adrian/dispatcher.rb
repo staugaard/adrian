@@ -25,7 +25,17 @@ module Adrian
       @running = true
 
       while @running do
-        if item = queue.pop
+        begin
+          item = queue.pop
+        rescue Adrian::Queue::ItemTooOldError => e
+          if handler = @failure_handler.handle(e)
+            handler.call(e.item, nil, e)
+          end
+          item = nil
+          next
+        end
+
+        if item
           delegate_work(item, worker_class)
         else
           if @stop_when_done

@@ -1,11 +1,45 @@
 module Adrian
   class Queue
+    class ItemTooOldError < RuntimeError
+      attr_reader :item, :queue
+
+      def initialize(item, queue)
+        super()
+        @item  = item
+        @queue = queue
+      end
+    end
+
+    def initialize(options = {})
+      @options = options
+    end
+
     def pop
-      raise "#{self.class.name}#pop is not defined"
+      verify_age!(pop_item)
     end
 
     def push(item)
-      raise "#{self.class.name}#push is not defined"
+      push_item(item)
+    end
+
+    def verify_age!(item)
+      if item && max_age && item.age > max_age
+        raise ItemTooOldError.new(item, self)
+      end
+
+      item
+    end
+
+    def max_age
+      @max_age ||= @options[:max_age]
+    end
+
+    def pop_item
+      raise "#{self.class.name}#pop_item is not defined"
+    end
+
+    def push_item(item)
+      raise "#{self.class.name}#push_item is not defined"
     end
   end
 end

@@ -3,7 +3,7 @@ require_relative 'test_helper'
 describe Adrian::Dispatcher do
   before do
     $done_items = []
-    @q          = Adrian::ArrayQueue.new
+    @q          = Adrian::ArrayQueue.new([], :max_age => 1000)
     @dispatcher = Adrian::Dispatcher.new(:stop_when_done => true)
     @worker     = TestWorker
   end
@@ -16,7 +16,7 @@ describe Adrian::Dispatcher do
     end
 
     def perform
-      $done_items << [@boss, @item.value]
+      $done_items << @item.value
     end
 
     def report_to(boss)
@@ -33,7 +33,38 @@ describe Adrian::Dispatcher do
 
       @dispatcher.start(@q, @worker)
 
-      $done_items.must_equal([[@dispatcher, 1], [@dispatcher, 2], [@dispatcher, 3]])
+      $done_items.must_equal([1, 2, 3])
+    end
+  end
+
+  describe "a queue with old items" do
+    before do
+      @q.push(Adrian::QueueItem.new(1, Time.now))
+      @old_item = Adrian::QueueItem.new(2, Time.now - 2000)
+      @q.push(@old_item)
+      @q.push(Adrian::QueueItem.new(3, Time.now))
+    end
+
+    it 'skips the old items' do
+      @dispatcher.start(@q, @worker)
+
+      $done_items.must_equal([1, 3])
+    end
+
+    it 'calls the handler for Adrian::Queue::ItemTooOldError' do
+      handled_items      = []
+      handled_exceptions = []
+
+      @dispatcher.on_failure(Adrian::Queue::ItemTooOldError) do |item, worker, exception|
+        handled_items      << item
+        handled_exceptions << exception
+      end
+
+      @dispatcher.start(@q, @worker)
+
+      handled_items.must_equal [@old_item]
+      handled_exceptions.size.must_equal 1
+      handled_exceptions.first.must_be_instance_of Adrian::Queue::ItemTooOldError
     end
   end
 

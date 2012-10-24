@@ -6,5 +6,9 @@ module Adrian
       @value      = value
       @created_at = created_at
     end
+
+    def age
+      Time.now - created_at
+    end
   end
 end

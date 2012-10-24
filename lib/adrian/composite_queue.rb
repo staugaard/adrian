@@ -3,6 +3,7 @@ require 'adrian/queue'
 module Adrian
   class CompositeQueue < Queue
     def initialize(*queues)
+      super()
       @queues = queues.flatten
     end
 
