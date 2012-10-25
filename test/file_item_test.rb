@@ -27,6 +27,10 @@ describe Adrian::FileItem do
 
   describe 'updated_at' do
 
+    it 'is the atime of the file' do
+      @item.updated_at.must_equal File.atime(@item.path)
+    end
+
     it 'is nil when moved by another process' do
       item = Adrian::FileItem.new('moved/during/initialize')
       assert_equal false, item.exist?
@@ -40,6 +44,29 @@ describe Adrian::FileItem do
       assert_equal false, @item.exist?
 
       assert_equal updated_at, @item.updated_at
+    end
+
+  end
+
+  describe 'created_at' do
+
+    it 'is the mtime of the file' do
+      @item.created_at.must_equal File.mtime(@item.path)
+    end
+
+    it 'is nil when moved by another process' do
+      item = Adrian::FileItem.new('moved/during/initialize')
+      assert_equal false, item.exist?
+      assert_equal nil,   item.created_at
+    end
+
+    it 'is cached' do
+      created_at = @item.created_at
+      assert @item.created_at
+      File.unlink(@item.path)
+      assert_equal false, @item.exist?
+
+      assert_equal created_at, @item.created_at
     end
 
   end
@@ -70,6 +97,18 @@ describe Adrian::FileItem do
       logger.verify
     end
 
+    it 'does not change the atime' do
+      atime = File.atime(@item.path)
+      @item.move(@destination)
+      File.atime(@item.path).must_equal atime
+    end
+
+    it 'does not change the mtime' do
+      mtime = File.mtime(@item.path)
+      @item.move(@destination)
+      File.mtime(@item.path).must_equal mtime
+    end
+
   end
 
   describe 'touch' do
@@ -79,6 +118,26 @@ describe Adrian::FileItem do
       Time.stub(:new, now) { @item.touch }
 
       assert_equal now.to_i, @item.updated_at.to_i
+    end
+
+    it 'changes the atime' do
+      atime = File.atime(@item.path).to_i
+
+      now = (Time.now - 100)
+      Time.stub(:new, now) { @item.touch }
+
+      now.to_i.wont_equal atime
+      File.atime(@item.path).to_i.must_equal now.to_i
+    end
+
+    it 'does not change the mtime' do
+      mtime = File.mtime(@item.path).to_i
+
+      now = (Time.now - 100)
+      Time.stub(:new, now) { @item.touch }
+
+      now.to_i.wont_equal mtime
+      File.mtime(@item.path).to_i.must_equal mtime
     end
 
   end

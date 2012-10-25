@@ -2,9 +2,9 @@ module Adrian
   class FileItem < QueueItem
     attr_accessor :logger
 
-    def initialize(value, created_at = Time.now)
+    def initialize(value)
       @value      = value
-      @created_at = created_at
+      created_at
       updated_at
     end
 
@@ -28,15 +28,29 @@ module Adrian
       @value = destination_path
     end
 
-    def updated_at
-      @updated_at ||= File.mtime(path).utc
+    def atime
+      File.atime(path).utc
     rescue Errno::ENOENT
       nil
     end
 
+    def mtime
+      File.mtime(path).utc
+    rescue Errno::ENOENT
+      nil
+    end
+
+    def updated_at
+      @updated_at ||= atime
+    end
+
+    def created_at
+      @created_at ||= mtime
+    end
+
     def touch(updated_at = Time.new)
-      @updated_at = updated_at
-      File.utime(updated_at, updated_at, path)
+      @updated_at = updated_at.utc
+      File.utime(updated_at, created_at, path)
     end
 
     def exist?
