@@ -8,4 +8,5 @@ group :development do
   gem 'guard-minitest'
   gem 'rb-fsevent'
   gem 'terminal-notifier-guard'
+  gem 'debugger', :platforms => :mri_19
 end
