@@ -46,12 +46,12 @@ describe Adrian::Filters do
       @filter          = Adrian::Filters::Delay.new
       @updatable_item  = Adrian::QueueItem.new("hello")
       @updatable_item.extend(Updatable)
-      @updatable_item.updated_at = Time.new
+      @updatable_item.updated_at = Time.now
       @fifteen_minutes = 900
     end
 
     it "allows items that have not been recently updated" do
-      Time.stub(:new, @updatable_item.updated_at + @fifteen_minutes) do
+      Time.stub(:now, @updatable_item.updated_at + @fifteen_minutes) do
         assert_equal true, @filter.allow?(@updatable_item)
       end
     end
@@ -82,13 +82,13 @@ describe Adrian::Filters do
     end
 
     it "allows items with an expired lock" do
-      @locked_item.stub(:updated_at, Time.new - @one_hour) do
+      @locked_item.stub(:updated_at, Time.now - @one_hour) do
         assert_equal true, @filter.allow?(@locked_item)
       end
     end
 
     it "does not allow items with a fresh lock" do
-      @locked_item.stub(:updated_at, Time.new) do
+      @locked_item.stub(:updated_at, Time.now) do
         assert_equal false, @filter.allow?(@locked_item)
       end
     end

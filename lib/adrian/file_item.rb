@@ -48,7 +48,7 @@ module Adrian
       @created_at ||= mtime
     end
 
-    def touch(updated_at = Time.new)
+    def touch(updated_at = Time.now)
       @updated_at = updated_at.utc
       File.utime(updated_at, created_at, path)
     end

@@ -115,7 +115,7 @@ describe Adrian::FileItem do
 
     it 'changes the update timestamp to the current time' do
       now = Time.now - 100
-      Time.stub(:new, now) { @item.touch }
+      Time.stub(:now, now) { @item.touch }
 
       assert_equal now.to_i, @item.updated_at.to_i
     end
@@ -124,7 +124,7 @@ describe Adrian::FileItem do
       atime = File.atime(@item.path).to_i
 
       now = (Time.now - 100)
-      Time.stub(:new, now) { @item.touch }
+      Time.stub(:now, now) { @item.touch }
 
       now.to_i.wont_equal atime
       File.atime(@item.path).to_i.must_equal now.to_i

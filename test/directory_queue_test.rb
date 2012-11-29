@@ -58,11 +58,11 @@ describe Adrian::DirectoryQueue do
         assert reserved_item
         one_hour = 3_600
 
-        Time.stub(:new, reserved_item.updated_at + one_hour - 1) do
+        Time.stub(:now, reserved_item.updated_at + one_hour - 1) do
           assert_equal nil, @q.pop
         end
 
-        Time.stub(:new, reserved_item.updated_at + one_hour) do
+        Time.stub(:now, reserved_item.updated_at + one_hour) do
           assert_equal @item, @q.pop
         end
 
@@ -70,9 +70,9 @@ describe Adrian::DirectoryQueue do
 
       it 'touches the item' do
         @q.push(@item)
-        now  = Time.new + 100
+        now  = Time.now + 100
         item = nil
-        Time.stub(:new, now) { item = @q.pop }
+        Time.stub(:now, now) { item = @q.pop }
 
         assert_equal now.to_i, item.updated_at.to_i
       end
@@ -111,8 +111,8 @@ describe Adrian::DirectoryQueue do
       end
 
       it 'touches the item' do
-        now = Time.new - 100
-        Time.stub(:new, now) { @q.push(@item) }
+        now = Time.now - 100
+        Time.stub(:now, now) { @q.push(@item) }
 
         assert_equal now.to_i, @item.updated_at.to_i
       end

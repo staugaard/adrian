@@ -17,7 +17,7 @@ module Adrian
       end
 
       def allow?(item)
-        item.updated_at <= (Time.new - duration)
+        item.updated_at <= (Time.now - duration)
       end
 
       def duration
@@ -39,7 +39,7 @@ module Adrian
       end
 
       def lock_expired?(item)
-        item.updated_at <= (Time.new - duration)
+        item.updated_at <= (Time.now - duration)
       end
 
       def locked?(item)
