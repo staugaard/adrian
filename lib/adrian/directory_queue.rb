@@ -87,7 +87,7 @@ module Adrian
     end
 
     def default_reserved_path
-      File.join(File.dirname(@available_path), 'cur')
+      File.join(@available_path, 'cur')
     end
 
   end
