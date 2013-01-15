@@ -41,5 +41,9 @@ module Adrian
     def push_item(item)
       raise "#{self.class.name}#push_item is not defined"
     end
+
+    def length
+      raise "#{self.class.name}#length is not defined"
+    end
   end
 end

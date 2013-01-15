@@ -18,6 +18,10 @@ module Adrian
       self
     end
 
+    def length
+      @mutex.synchronize { @array.size }
+    end
+
     protected
 
     def wrap_item(item)

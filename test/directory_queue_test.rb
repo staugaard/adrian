@@ -11,8 +11,8 @@ describe Adrian::DirectoryQueue do
   end
 
   after do
-   FileUtils.rm_r(@q.available_path, :force => true)
-   FileUtils.rm_r(@q.reserved_path,  :force => true)
+    FileUtils.rm_r(@q.available_path, :force => true)
+    FileUtils.rm_r(@q.reserved_path,  :force => true)
   end
 
   it 'should act as a queue for files' do
@@ -24,10 +24,14 @@ describe Adrian::DirectoryQueue do
     @q.push(item2)
     @q.push(item3)
 
+    @q.length.must_equal 3
+
     @q.pop.must_equal Adrian::FileItem.new(item1)
     @q.pop.must_equal Adrian::FileItem.new(item2)
     @q.pop.must_equal Adrian::FileItem.new(item3)
     @q.pop.must_be_nil
+
+    @q.length.must_equal 0
   end
 
   describe 'file backend' do

@@ -21,9 +21,13 @@ describe Adrian::ArrayQueue do
     q.push(2)
     q.push(3)
 
+    q.length.must_equal 3
+
     q.pop.value.must_equal 1
     q.pop.value.must_equal 2
     q.pop.value.must_equal 3
     q.pop.must_be_nil
+
+    q.length.must_equal 0
   end
 end

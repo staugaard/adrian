@@ -43,6 +43,10 @@ module Adrian
       self
     end
 
+    def length
+      available_files.count { |file| File.file?(file) }
+    end
+
     def include?(value)
       item = wrap_item(value)
       items.include?(item)
