@@ -7,10 +7,12 @@ describe Adrian::RotatingDirectoryQueue do
   before do
     @root_path = Dir.mktmpdir('dir_queue_test')
     @q = Adrian::RotatingDirectoryQueue.create(:path => @root_path)
+    Timecop.freeze
   end
 
   after do
-   FileUtils.rm_r(@root_path, :force => true)
+    Timecop.return
+    FileUtils.rm_r(@root_path, :force => true)
   end
 
   describe 'pop' do
@@ -19,20 +21,18 @@ describe Adrian::RotatingDirectoryQueue do
       @item2 = Adrian::FileItem.new(Tempfile.new('item2').path)
       @item3 = Adrian::FileItem.new(Tempfile.new('item3').path)
 
-      Time.stub(:now, Time.now) do
-        todays_directory    = File.join(@root_path, Time.now.strftime('%Y-%m-%d'))
-        tomorrows_directory = File.join(@root_path, (Time.now + 60 * 60 * 24).strftime('%Y-%m-%d'))
+      todays_directory    = File.join(@root_path, Time.now.strftime('%Y-%m-%d'))
+      tomorrows_directory = File.join(@root_path, (Time.now + 60 * 60 * 24).strftime('%Y-%m-%d'))
 
-        FileUtils.mkdir_p(todays_directory)
-        FileUtils.mkdir_p(tomorrows_directory)
+      FileUtils.mkdir_p(todays_directory)
+      FileUtils.mkdir_p(tomorrows_directory)
 
-        @item1.move(todays_directory)
-        @item2.move(tomorrows_directory)
-        @item3.move(@root_path)
+      @item1.move(todays_directory)
+      @item2.move(tomorrows_directory)
+      @item3.move(@root_path)
 
-        @q.pop.must_equal @item1
-        @q.pop.must_be_nil
-      end
+      @q.pop.must_equal @item1
+      @q.pop.must_be_nil
     end
   end
 
@@ -42,15 +42,13 @@ describe Adrian::RotatingDirectoryQueue do
     end
 
     it 'moves the file to the time-stamped available directory' do
-      Time.stub(:now, Time.now) do
-        original_path = @item.path
-        @q.push(@item)
+      original_path = @item.path
+      @q.push(@item)
 
-        assert_equal false, File.exist?(original_path)
-        assert_equal true,  File.exist?(File.join(@q.available_path, @item.name))
+      assert_equal false, File.exist?(original_path)
+      assert_equal true,  File.exist?(File.join(@q.available_path, @item.name))
 
-        @item.path.must_equal File.join(@root_path, Time.now.strftime('%Y-%m-%d'), @item.name)
-      end
+      @item.path.must_equal File.join(@root_path, Time.now.strftime('%Y-%m-%d'), @item.name)
     end
   end
 

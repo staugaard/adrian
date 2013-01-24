@@ -10,3 +10,7 @@ group :development do
   gem 'terminal-notifier-guard'
   gem 'debugger', :platforms => :mri_19
 end
+
+group :test do
+  gem 'timecop'
+end
