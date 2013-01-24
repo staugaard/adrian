@@ -15,7 +15,9 @@ module Adrian
     end
 
     def pop
-      verify_age!(pop_item)
+      item = pop_item
+      item.queue = self if item
+      verify_age!(item)
     end
 
     def push(item)

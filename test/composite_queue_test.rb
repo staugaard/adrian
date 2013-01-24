@@ -26,6 +26,14 @@ describe Adrian::CompositeQueue do
       @q1.pop.must_be_nil
       @q2.pop.must_be_nil
     end
+
+    it 'sets the original queue on the item' do
+      @q1.push(1)
+      @q2.push(2)
+
+      @q.pop.queue.must_equal @q1
+      @q.pop.queue.must_equal @q2
+    end
   end
 
   describe "pushing" do

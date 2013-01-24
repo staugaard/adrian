@@ -25,6 +25,24 @@ describe Adrian::Queue do
       @q.push(item)
       lambda { @q.pop }.must_raise(Adrian::Queue::ItemTooOldError)
     end
+
+  end
+
+  it 'sets the queue on the items' do
+    q = TestQueue.new
+
+    item = Adrian::QueueItem.new('value', Time.now)
+
+    item.queue.must_be_nil
+
+    q.push(item)
+
+    item.queue.must_be_nil
+
+    popped_item = q.pop
+
+    popped_item.must_equal item
+    item.queue.must_equal q
   end
 
 end
