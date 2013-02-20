@@ -3,9 +3,10 @@ require File.expand_path('../lib/adrian/version', __FILE__)
 
 Gem::Specification.new do |gem|
   gem.authors       = ['Mick Staugaard', 'Eric Chapweske']
-  gem.description   = "A work dispatcher and some queue implementations"
-  gem.summary       = "Adrian does not do any real work, but is really good at delegating it"
+  gem.description   = 'A work dispatcher and some queue implementations'
+  gem.summary       = 'Adrian does not do any real work, but is really good at delegating it'
   gem.homepage      = 'https://github.com/staugaard/adrian'
+  gem.license       = 'Apache License Version 2.0'
 
 
   gem.files         = Dir.glob('{lib,test}/**/*') + ['README.md', 'CONTRIBUTING.md']
